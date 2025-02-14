@@ -21,6 +21,9 @@
 
             <!-- Sign In Form -->
             <div id="signin-form" class="p-6">
+                {%for m in messages%}
+                {{m}}
+                {%endfor%}
                 <form method="post" action="{%url 'signin'%}">
                     {%csrf_token%}
                     <div class="space-y-4">

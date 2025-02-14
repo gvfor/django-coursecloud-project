@@ -13,5 +13,6 @@ urlpatterns=[
     path("mycourses/",views.MyCoursesView.as_view(),name="mycourses"),
     path("courses/<int:pk>/watch/",views.LessonDetailView.as_view(),name="lesson-detail"),
     path("payment/verify/",views.PaymentVerificationView.as_view(),name="payment-verify"),
+    path("signout/",views.SignoutView.as_view(),name="logout"),
 
 ]

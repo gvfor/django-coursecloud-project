@@ -2,10 +2,13 @@ from django.shortcuts import render,redirect
 from django.views.generic import View,FormView,TemplateView,CreateView
 from student.forms import StudentCreateForm,SignInForm
 from django.urls import reverse_lazy
-from django.contrib.auth import authenticate,login
+from django.contrib.auth import authenticate,login,logout
 from instructor.models import Course,Cart,Order,Lesson,Module
 from django.db.models import Sum
 import razorpay
+from student.decorators import signin_required
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
 RZP_KEY_ID="rzp_test_EYY5XmeS5VDAYk"
@@ -21,7 +24,7 @@ class StudentRegistrationView(CreateView):
 
 class SignInView(FormView):
 
-    template_name="signin.html"
+    template_name="student_register.html"
 
     form_class=SignInForm
 
@@ -48,7 +51,7 @@ class SignInView(FormView):
                 return redirect("index")
 
         return render(request,"signin.html",{"form":form_instance})
-    
+@method_decorator(signin_required,name="dispatch")    
 class IndexView(View):
 
    def get(self,request,*args,**kwargs):
@@ -61,7 +64,7 @@ class IndexView(View):
 
        return render(request,"home.html",{"courses":all_courses,"purchased_courses":purchased_courses})
    
-
+@method_decorator(signin_required,name="dispatch")    
 class CourseDetailView(View):
 
     def get(self,request,*args,**kwargs):
@@ -71,7 +74,7 @@ class CourseDetailView(View):
         course_instance=Course.objects.get(id=id)
 
         return render(request,"course_detail.html",{"course":course_instance})
-    
+@method_decorator(signin_required,name="dispatch")        
 class AddToCartView(View):
 
     def get(self,request,*args,**kwargs):
@@ -87,7 +90,7 @@ class AddToCartView(View):
         print(created)
 
         return redirect("index")
-
+@method_decorator(signin_required,name="dispatch")    
 class CartSummmaryView(View):
 
     def get(self,request,*args,**kwargs):
@@ -99,7 +102,7 @@ class CartSummmaryView(View):
         print("======" ,cart_total)
 
         return render(request,"cart-summary.html",{"carts":qs,"basket_total":cart_total})
-
+@method_decorator(signin_required,name="dispatch")    
 class CartItemDeleteView(View):
 
     def get(self,request,*args,**kwargs):
@@ -109,7 +112,7 @@ class CartItemDeleteView(View):
         Cart.objects.get(id=id).delete()
 
         return redirect("cart-summary") 
-
+@method_decorator(signin_required,name="dispatch")    
 class CheckOutView(View):
 
     def get(self,request,*args,**kwargs):
@@ -156,7 +159,7 @@ class CheckOutView(View):
             order_instance.save()
 
         return redirect("index") 
-
+@method_decorator(signin_required,name="dispatch")    
 class MyCoursesView(View):
 
     def get(self,request,*args,**kwargs):
@@ -165,7 +168,7 @@ class MyCoursesView(View):
 
         return render(request,"mycourses.html",{"orders":qs})
 
-
+@method_decorator(signin_required,name="dispatch")    
 class LessonDetailView(View):
 
     def get(self,request,*args,**kwargs):
@@ -186,8 +189,7 @@ class LessonDetailView(View):
 
         return render(request,"lesson_detail.html",{"course":course_instance,"lesson":lesson_instance})          
 
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+
 
 @method_decorator([csrf_exempt],name="dispatch")
 class PaymentVerificationView(View):
@@ -217,6 +219,14 @@ class PaymentVerificationView(View):
 
         return redirect("index")        
 
+@method_decorator(signin_required,name="dispatch")    
+class SignoutView(View):
+
+    def get(self, request, *args, **kwargs):
+
+        logout(request)
+
+        return redirect("signin")
         
 
 
